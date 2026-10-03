@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Bon House - Sistema de Inventario</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
+
+    <section id="loginScreen">
+
+        <div class="login-card">
+
+            <h1>Bon House</h1>
+
+            <p>
+                Sistema de control de inventario
+            </p>
+
+
+            <form id="loginForm">
+
+                <label>
+                    Usuario
+
+                    <input
+                        id="loginUser"
+                        type="text"
+                        placeholder="Usuario"
+                        autocomplete="username"
+                        required
+                    >
+                </label>
+
+
+                <label>
+                    Contraseña
+
+                    <input
+                        id="loginPass"
+                        type="password"
+                        placeholder="Contraseña"
+                        autocomplete="current-password"
+                        required
+                    >
+                </label>
+
+
+                <div id="loginError"></div>
+
+
+                <button
+                    type="submit"
+                    class="primary"
+                >
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         APLICACIÓN
+    ====================================================== -->
+
+    <div
+        id="app"
+        class="hidden"
+    >
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+
+                <h2>Bon House</h2>
+
+                <p>
+                    Control de Inventario
+                </p>
+
+            </div>
+
+
+            <nav class="nav">
+
+                <button
+                    type="button"
+                    class="nav-btn active"
+                    data-page="dashboard"
+                >
+                    📊 Dashboard
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-btn"
+                    data-page="products"
+                >
+                    📦 Productos
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-btn"
+                    data-page="suppliers"
+                >
+                    🚚 Proveedores
+                </button>
+
+
+                <button type="button" class="nav-btn" data-page="invoices">
+                    🧾 Facturas / Compras
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-btn"
+                    data-page="notes"
+                >
+                    📝 Notas
+                </button>
+
+            </nav>
+
+
+            <button
+                type="button"
+                id="logoutBtn"
+            >
+                🚪 Cerrar sesión
+            </button>
+
+        </aside>
+
+
+        <!-- =================================================
+             CONTENIDO PRINCIPAL
+        ================================================== -->
+
+        <main class="main">
+
+            <!-- =============================================
+                 BARRA SUPERIOR
+            ============================================== -->
+
+            <header class="topbar">
+
+                <div>
+
+                    <h1 id="pageTitle">
+                        Dashboard
+                    </h1>
+
+                </div>
+
+
+                <div class="top-actions">
+
+                    <input
+                        type="date"
+                        id="inventoryDate"
+                        title="Fecha del inventario"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="notifyBtn"
+                        class="secondary"
+                        title="Activar notificaciones"
+                    >
+                        🔔 Activar
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="bellBtn"
+                        title="Ver alertas"
+                    >
+                        🔔
+
+                        <span id="alertCount">
+                            0
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================================
+                 DASHBOARD
+            ================================================== -->
+
+            <section
+                id="dashboardPage"
+                class="page"
+            >
+
+                <div class="page-head">
+
+                    <div>
+
+                        <h2>
+                            Inventario
+                        </h2>
+
+                        <p>
+                            Productos separados automáticamente
+                            por proveedor.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     ESTADÍSTICAS
+                ========================================== -->
+
+                <div class="stats">
+
+                    <div class="stat-card">
+
+                        <span class="label">
+                            Productos
+                        </span>
+
+                        <strong id="statProducts">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card normal">
+
+                        <span class="label">
+                            Stock normal
+                        </span>
+
+                        <strong id="statNormal">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card low">
+
+                        <span class="label">
+                            Stock bajo
+                        </span>
+
+                        <strong id="statLow">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card out">
+
+                        <span class="label">
+                            Agotados
+                        </span>
+
+                        <strong id="statOut">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     VALOR DEL INVENTARIO
+                ========================================== -->
+
+                <div class="money-card">
+
+                    <small>
+                        Valor estimado del inventario
+                    </small>
+
+                    <div id="totalMoney">
+                        $0.00
+                    </div>
+
+                    <div id="moneyDate">
+                        Inventario
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     FILTROS
+                ========================================== -->
+
+                <div class="filters">
+
+                    <input
+                        id="searchInput"
+                        type="search"
+                        placeholder="Buscar producto, marca o proveedor..."
+                    >
+
+
+                    <select id="productStatusFilter">
+
+                        <option value="all">
+                            Todos los estados
+                        </option>
+
+                        <option value="normal">
+                            Stock normal
+                        </option>
+
+                        <option value="low">
+                            Stock bajo
+                        </option>
+
+                        <option value="out">
+                            Agotados
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        type="button"
+                        id="newProductBtn"
+                        class="primary"
+                    >
+                        + Nuevo producto
+                    </button>
+
+                </div>
+
+
+                <!-- =========================================
+                     INVENTARIO AGRUPADO POR PROVEEDOR
+                ========================================== -->
+
+                <div id="inventoryGroups">
+
+                    <!--
+                        JavaScript coloca aquí:
+
+                        PRICESMART
+                        productos...
+
+                        SUPER SELECTOS
+                        productos...
+
+                        AGENCIA
+                        productos...
+                    -->
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PRODUCTOS
+            ================================================== -->
+
+            <section
+                id="productsPage"
+                class="page hidden"
+            >
+
+                <div class="page-head">
+
+                    <div>
+
+                        <h2>
+                            Productos
+                        </h2>
+
+                        <p>
+                            Administración de productos
+                            del inventario.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="newProductBtn2"
+                        class="primary"
+                    >
+                        + Nuevo producto
+                    </button>
+
+                </div>
+
+
+                <div class="toolbar">
+
+                    <input
+                        id="productSearch"
+                        type="search"
+                        placeholder="Buscar producto..."
+                    >
+
+
+                    <select id="productStatusFilter2">
+
+                        <option value="all">
+                            Todos
+                        </option>
+
+                        <option value="normal">
+                            Normal
+                        </option>
+
+                        <option value="low">
+                            Stock bajo
+                        </option>
+
+                        <option value="out">
+                            Agotado
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="supplier-group">
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Proveedor
+                                    </th>
+
+                                    <th>
+                                        Información
+                                    </th>
+
+                                    <th>
+                                        Unidad inventario
+                                    </th>
+
+                                    <th>
+                                        Existencia
+                                    </th>
+
+                                    <th>
+                                        Valor
+                                    </th>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Acciones
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="productsBody">
+
+                                <!-- JavaScript -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROVEEDORES
+            ================================================== -->
+
+            <section
+                id="suppliersPage"
+                class="page hidden"
+            >
+
+                <div class="page-head">
+
+                    <div>
+
+                        <h2>
+                            Proveedores
+                        </h2>
+
+                        <p>
+                            Administración de proveedores.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="newSupplierBtn"
+                        class="primary"
+                    >
+                        + Nuevo proveedor
+                    </button>
+
+                </div>
+
+
+                <div class="supplier-group">
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Proveedor
+                                    </th>
+
+                                    <th>
+                                        Teléfono
+                                    </th>
+
+                                    <th>
+                                        Correo
+                                    </th>
+
+                                    <th>
+                                        Notas
+                                    </th>
+
+                                    <th>
+                                        Acciones
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="suppliersBody">
+
+                                <!-- JavaScript -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 NOTAS
+            ================================================== -->
+
+            <section id="invoicesPage" class="page hidden">
+                <div class="page-head">
+                    <div><h2>Facturas / Compras</h2><p>OCR conectado al inventario, proveedores e historial de precios.</p></div>
+                </div>
+                <div class="invoice-tabs">
+                    <button class="invoice-tab active" data-itab="invoiceScan">📸 Facturas por foto</button>
+                    <button class="invoice-tab" data-itab="invoiceSaved">📁 Facturas fotografiadas</button>
+                    <button class="invoice-tab" data-itab="invoicePrices">💲 Historial de precios</button>
+                </div>
+                <div id="invoiceScan" class="invoice-subpage">
+                    <div class="invoice-panel">
+                        <h3>📸 Subir o tomar foto</h3><p class="muted">La factura se lee con OCR. Después puedes revisar y vincular cada línea con un producto del inventario.</p>
+                        <input id="invoiceFile" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
+                        <button class="primary" id="invoiceRead" type="button">🔍 Leer factura automáticamente</button>
+                        <div id="invoiceProgress" class="hidden"><div class="invoice-bar"><i id="invoiceBar"></i></div><b id="invoiceProgText">Preparando OCR...</b></div>
+                    </div>
+                    <div id="invoiceReview" class="hidden">
+                        <div class="invoice-review-grid">
+                            <div class="invoice-panel"><h3>Factura original</h3><img id="invoicePreview" class="invoice-preview"></div>
+                            <div class="invoice-panel"><h3>Datos detectados</h3><div class="invoice-form-grid">
+                                <label>Proveedor<input id="invoiceSupplier" list="invoiceSupplierList"><datalist id="invoiceSupplierList"></datalist></label>
+                                <label>Fecha<input id="invoiceDate" type="date"></label>
+                                <label>N.º factura<input id="invoiceNumber"></label>
+                                <label>Total ($)<input id="invoiceTotal" type="number" step=".01"></label>
+                            </div><label>Texto / observaciones<textarea id="invoiceNotes" rows="5"></textarea></label></div>
+                        </div>
+                        <div class="invoice-panel"><div class="invoice-head"><div><h3>Productos detectados</h3><p class="muted">Vincula cada línea con el inventario. El precio solo se actualiza si marcas “Actualizar”.</p></div><button id="invoiceAdd" type="button">＋ Producto</button></div>
+                            <div class="tablewrap"><table class="invoice-table"><thead><tr><th>Producto factura</th><th>Producto inventario</th><th>Cant.</th><th>Unidad compra</th><th>Precio nuevo</th><th>Precio actual</th><th>Diferencia</th><th>Actualizar</th><th></th></tr></thead><tbody id="invoiceRows"></tbody></table></div>
+                            <div class="invoice-savebar"><button class="primary" id="invoiceSave" type="button">💾 Guardar factura y compra</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="invoiceSaved" class="invoice-subpage hidden">
+                    <div class="invoice-panel">
+                        <h3>📁 Facturas fotografiadas por proveedor</h3>
+                        <p class="muted">Cada proveedor tiene su carpeta. Entra a una carpeta para buscar las facturas por fecha.</p>
+                        <div class="invoice-filters"><input id="invoiceQ" placeholder="Buscar proveedor..."><input id="invoiceFrom" type="date"><input id="invoiceTo" type="date"><button id="invoiceClear" type="button">Limpiar</button></div>
+                    </div>
+                    <div id="invoiceList"></div>
+                </div>
+                <div id="invoicePrices" class="invoice-subpage hidden"><div class="invoice-panel"><h3>💲 Historial de precios</h3><input id="invoicePriceQ" placeholder="Buscar producto..."></div><div id="invoicePriceList"></div></div>
+            </section>
+
+
+            <section
+                id="notesPage"
+                class="page hidden"
+            >
+
+                <div class="page-head">
+
+                    <div>
+
+                        <h2>
+                            Notas
+                        </h2>
+
+                        <p>
+                            Observaciones y recordatorios
+                            del inventario.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="newNoteBtn"
+                        class="primary"
+                    >
+                        + Nueva nota
+                    </button>
+
+                </div>
+
+
+                <div id="notesGrid">
+
+                    <!-- JavaScript -->
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL PRODUCTO
+    ====================================================== -->
+
+    <div
+        id="productModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-card">
+
+            <div class="modal-head">
+
+                <h2 id="productModalTitle">
+                    Nuevo producto
+                </h2>
+
+
+                <button
+                    type="button"
+                    data-close="productModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="productForm">
+
+                <input
+                    type="hidden"
+                    id="editId"
+                >
+
+
+                <div class="form-grid">
+
+
+                    <!-- PROVEEDOR -->
+
+                    <label>
+
+                        Proveedor
+
+                        <input
+                            id="fSupplier"
+                            placeholder="Ej. PRICESMART"
+                        >
+
+                    </label>
+
+
+                    <!-- NOMBRE -->
+
+                    <label>
+
+                        Nombre del producto/Marca
+
+                        <input
+                            id="fName"
+                            placeholder="Ej. LEJÍA"
+                        >
+
+                    </label>
+
+
+                    <!-- INFORMACIÓN / MARCA -->
+
+                    <label>
+
+                        Información Del Producto
+
+                        <input
+                            id="fBrand"
+                            placeholder="Ej. BLANCO SOL"
+                        >
+
+                    </label>
+
+
+                    <!-- PRECIO -->
+
+                    <label>
+
+                        Precio de compra
+
+                        <input
+                            id="fPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDAD COMPRA -->
+
+                    <label>
+
+                        Unidad de compra/Paquete
+
+                        <select id="fUnit"></select>
+
+                    </label>
+
+
+                    <!-- CANTIDAD COMPRADA -->
+
+                    <label>
+
+                        Cantidad comprada
+
+                        <input
+                            id="fPurchaseQty"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 1"
+                        >
+
+                    </label>
+
+
+                    <!-- SUBPAQUETE -->
+
+                    <label>
+
+                        SubPaquete
+
+                        <input
+                            id="fContent"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 6"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDAD INVENTARIO -->
+
+                    <label>
+
+                        Unidad de inventario
+
+                        <select
+                            id="fInventoryUnit"
+                        ></select>
+
+                    </label>
+
+
+                    <!-- UNIDADES POR SUBPAQUETE -->
+
+                    <label>
+
+                        Unidades Por Subpaquete
+
+                        <input
+                            id="fInnerContent"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 12"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDAD CONTENIDO FINAL -->
+
+                    <label>
+
+                        Unidad del contenido final
+
+                        <select
+                            id="fContentUnit"
+                        ></select>
+
+                    </label>
+
+
+                    <!-- UNIDADES COMPLETAS -->
+
+                    <label>
+
+                        Unidades Completas
+
+                        <input
+                            id="fComplete"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 6"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDADES SUELTAS -->
+
+                    <label>
+
+                        Unidades sueltas
+
+                        <input
+                            id="fLoose"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 0"
+                        >
+
+                    </label>
+
+
+                    <!-- MÍNIMO -->
+
+                    <label>
+
+                        Mínimo de stock
+
+                        <input
+                            id="fMin"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 10"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDAD MÍNIMO -->
+
+                    <label>
+
+                        Unidad del mínimo
+
+                        <select
+                            id="fMinUnit"
+                        ></select>
+
+                    </label>
+
+
+                    <!-- MÁXIMO -->
+
+                    <label>
+
+                        Máximo de stock
+
+                        <input
+                            id="fMax"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            placeholder="Ej. 72"
+                        >
+
+                    </label>
+
+
+                    <!-- UNIDAD MÁXIMO -->
+
+                    <label>
+
+                        Unidad del máximo
+
+                        <select
+                            id="fMaxUnit"
+                        ></select>
+
+                    </label>
+
+
+                    <!-- FECHA -->
+
+                    <label>
+
+                        Fecha del inventario
+
+                        <input
+                            id="fDate"
+                            type="date"
+                        >
+
+                    </label>
+
+
+                    <!-- REFERENCIA -->
+
+                    <label>
+
+                        Referencia / presentación
+
+                        <input
+                            id="fRef"
+                            placeholder="Ej. Fardo de 6 paquetes x 12 unidades"
+                        >
+
+                    </label>
+
+
+                    <!-- INFORMACIÓN ADICIONAL -->
+
+                    <label class="full-col">
+
+                        Información del producto
+
+                        <textarea
+                            id="fInfo"
+                            placeholder="Descripción, presentación, tamaño, características..."
+                        ></textarea>
+
+                    </label>
+
+
+                    <!-- CÁLCULO AUTOMÁTICO -->
+
+                    <div id="calcText">
+
+                        Ingresa las cantidades para
+                        calcular el inventario.
+
+                    </div>
+
+
+                    <!-- BOTONES -->
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary"
+                            data-close="productModal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary"
+                        >
+                            Guardar producto
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL PROVEEDOR
+    ====================================================== -->
+
+    <div
+        id="supplierModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-card small">
+
+            <div class="modal-head">
+
+                <h2>
+                    Proveedor
+                </h2>
+
+
+                <button
+                    type="button"
+                    data-close="supplierModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="supplierForm">
+
+                <input
+                    type="hidden"
+                    id="supplierEditId"
+                >
+
+
+                <div class="form-grid">
+
+
+                    <label class="full-col">
+
+                        Nombre del proveedor
+
+                        <input
+                            id="sName"
+                            placeholder="Ej. PRICESMART"
+                        >
+
+                    </label>
+
+
+                    <label>
+
+                        Teléfono
+
+                        <input
+                            id="sPhone"
+                            type="tel"
+                            placeholder="Ej. 7000-0000"
+                        >
+
+                    </label>
+
+
+                    <label>
+
+                        Correo electrónico
+
+                        <input
+                            id="sEmail"
+                            type="email"
+                            placeholder="correo@ejemplo.com"
+                        >
+
+                    </label>
+
+
+                    <label class="full-col">
+
+                        Notas
+
+                        <textarea
+                            id="sNotes"
+                            placeholder="Información adicional del proveedor..."
+                        ></textarea>
+
+                    </label>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary"
+                            data-close="supplierModal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary"
+                        >
+                            Guardar proveedor
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL NOTA
+    ====================================================== -->
+
+    <div
+        id="noteModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-card small">
+
+            <div class="modal-head">
+
+                <h2>
+                    Nota
+                </h2>
+
+
+                <button
+                    type="button"
+                    data-close="noteModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="noteForm">
+
+                <input
+                    type="hidden"
+                    id="noteEditId"
+                >
+
+
+                <div class="form-grid">
+
+
+                    <label class="full-col">
+
+                        Título
+
+                        <input
+                            id="nTitle"
+                            placeholder="Ej. Comprar productos faltantes"
+                        >
+
+                    </label>
+
+
+                    <label>
+
+                        Categoría
+
+                        <select id="nCategory">
+
+                            <option value="General">
+                                General
+                            </option>
+
+                            <option value="Compra">
+                                Compra
+                            </option>
+
+                            <option value="Inventario">
+                                Inventario
+                            </option>
+
+                            <option value="Proveedor">
+                                Proveedor
+                            </option>
+
+                            <option value="Importante">
+                                Importante
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label>
+
+                        Fecha
+
+                        <input
+                            id="nDate"
+                            type="date"
+                        >
+
+                    </label>
+
+
+                    <label class="full-col">
+
+                        Nota
+
+                        <textarea
+                            id="nText"
+                            placeholder="Escribe la nota..."
+                        ></textarea>
+
+                    </label>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary"
+                            data-close="noteModal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary"
+                        >
+                            Guardar nota
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL NUBE / CORREO
+    ====================================================== -->
+
+    <div
+        id="cloudModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-card small">
+
+            <div class="modal-head">
+
+                <h2>
+                    Enviar inventario
+                </h2>
+
+
+                <button
+                    type="button"
+                    data-close="cloudModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="padding: 20px;">
+
+                <p
+                    style="
+                        margin-bottom: 15px;
+                        color: #667781;
+                        line-height: 1.5;
+                    "
+                >
+                    Genera primero el PDF y luego puedes
+                    preparar un correo para enviarlo.
+                </p>
+
+
+                <label
+                    style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 7px;
+                        font-size: 13px;
+                        font-weight: 600;
+                    "
+                >
+
+                    Correo de destino
+
+                    <input
+                        id="emailTo"
+                        type="email"
+                        placeholder="correo@ejemplo.com"
+                    >
+
+                </label>
+
+
+                <div
+                    class="form-actions"
+                    style="margin-top: 18px;"
+                >
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        data-close="cloudModal"
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="emailBtn"
+                        class="primary"
+                    >
+                        ✉️ Preparar correo
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MENSAJE FLOTANTE
+    ====================================================== -->
+
+    <div id="toast"></div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+<div id="systemInvoiceModal" class="system-invoice-modal hidden" aria-hidden="true">
+  <div class="system-invoice-modal-backdrop" data-close-invoice-modal></div>
+  <section class="system-invoice-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="systemInvoiceModalTitle">
+    <div class="system-invoice-modal-toolbar">
+      <div>
+        <h2 id="systemInvoiceModalTitle">🧾 Factura del sistema</h2>
+        <small>Vista previa generada con la información del inventario.</small>
+      </div>
+      <div class="system-invoice-modal-actions">
+        <button id="downloadViewedInvoice" type="button" class="invoice-download-btn">⬇️ Descargar factura</button>
+        <button id="closeSystemInvoiceModal" type="button" class="invoice-close-btn" aria-label="Cerrar">✕</button>
+      </div>
+    </div>
+    <div class="system-invoice-preview-wrap">
+      <img id="systemInvoicePreview" alt="Vista previa de factura generada">
+    </div>
+  </section>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
+
+
+<canvas id="systemInvoiceCanvas" width="1600" height="1000" style="display:none"></canvas>
+    <script src="app.js"></script>
+</body>
+
+</html>

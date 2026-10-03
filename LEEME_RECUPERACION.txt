@@ -1,0 +1,5 @@
+BON HOUSE - INVENTARIO + FACTURAS
+
+Catálogo recuperado: 285 registros y 22 proveedores/categorías.
+Se carga automáticamente si el navegador tiene 0 o 1 productos.
+No reemplaza un inventario existente con varios productos.
